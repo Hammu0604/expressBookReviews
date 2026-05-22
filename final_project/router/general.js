@@ -6,26 +6,14 @@ const public_users = express.Router();
 
 
 // Get all books
-public_users.get('/', async function (req, res) {
+public_users.get('/', function (req, res) {
 
-    try {
-
-        return res.status(200).json({
-            books
-        });
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: "Error retrieving books"
-        });
-
-    }
+    return res.status(200).json(books);
 
 });
 
 
-// Get book by ISBN
+// Get book by ISBN using async/await with Axios
 public_users.get('/isbn/:isbn', async function (req, res) {
 
     const isbn = req.params.isbn;
@@ -34,7 +22,7 @@ public_users.get('/isbn/:isbn', async function (req, res) {
 
         const response = await axios.get('http://localhost:5000/');
 
-        const allBooks = response.data.books;
+        const allBooks = response.data;
 
         if (allBooks[isbn]) {
 
@@ -59,7 +47,7 @@ public_users.get('/isbn/:isbn', async function (req, res) {
 });
 
 
-// Get books by author
+// Get books by author using async/await with Axios
 public_users.get('/author/:author', async function (req, res) {
 
     const author = req.params.author;
@@ -68,31 +56,21 @@ public_users.get('/author/:author', async function (req, res) {
 
         const response = await axios.get('http://localhost:5000/');
 
-        const allBooks = response.data.books;
+        const allBooks = response.data;
 
-        let filteredBooks = {};
+        const filteredBooks = Object.keys(allBooks)
 
-        Object.keys(allBooks).forEach((key) => {
+            .filter(key => allBooks[key].author === author)
 
-            if (allBooks[key].author === author) {
+            .reduce((result, key) => {
 
-                filteredBooks[key] = allBooks[key];
+                result[key] = allBooks[key];
 
-            }
+                return result;
 
-        });
+            }, {});
 
-        if (Object.keys(filteredBooks).length > 0) {
-
-            return res.status(200).json(filteredBooks);
-
-        } else {
-
-            return res.status(404).json({
-                message: "Author not found"
-            });
-
-        }
+        return res.status(200).json(filteredBooks);
 
     } catch (error) {
 
@@ -105,7 +83,7 @@ public_users.get('/author/:author', async function (req, res) {
 });
 
 
-// Get books by title
+// Get books by title using async/await with Axios
 public_users.get('/title/:title', async function (req, res) {
 
     const title = req.params.title;
@@ -114,31 +92,21 @@ public_users.get('/title/:title', async function (req, res) {
 
         const response = await axios.get('http://localhost:5000/');
 
-        const allBooks = response.data.books;
+        const allBooks = response.data;
 
-        let filteredBooks = {};
+        const filteredBooks = Object.keys(allBooks)
 
-        Object.keys(allBooks).forEach((key) => {
+            .filter(key => allBooks[key].title === title)
 
-            if (allBooks[key].title === title) {
+            .reduce((result, key) => {
 
-                filteredBooks[key] = allBooks[key];
+                result[key] = allBooks[key];
 
-            }
+                return result;
 
-        });
+            }, {});
 
-        if (Object.keys(filteredBooks).length > 0) {
-
-            return res.status(200).json(filteredBooks);
-
-        } else {
-
-            return res.status(404).json({
-                message: "Title not found"
-            });
-
-        }
+        return res.status(200).json(filteredBooks);
 
     } catch (error) {
 
@@ -152,31 +120,11 @@ public_users.get('/title/:title', async function (req, res) {
 
 
 // Get book reviews
-public_users.get('/review/:isbn', async function (req, res) {
+public_users.get('/review/:isbn', function (req, res) {
 
     const isbn = req.params.isbn;
 
-    try {
-
-        if (books[isbn]) {
-
-            return res.status(200).json(books[isbn].reviews);
-
-        } else {
-
-            return res.status(404).json({
-                message: "Book not found"
-            });
-
-        }
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: "Error retrieving reviews"
-        });
-
-    }
+    return res.status(200).json(books[isbn].reviews);
 
 });
 
