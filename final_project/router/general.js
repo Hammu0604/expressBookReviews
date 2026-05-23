@@ -7,9 +7,7 @@ const public_users = express.Router();
 
 // Get all books
 public_users.get('/', function (req, res) {
-
     return res.status(200).json(books);
-
 });
 
 
@@ -21,25 +19,20 @@ public_users.get('/isbn/:isbn', async function (req, res) {
     try {
 
         const response = await axios.get('http://localhost:5000/');
-
         const allBooks = response.data;
 
         if (allBooks[isbn]) {
-
             return res.status(200).json(allBooks[isbn]);
-
-        } else {
-
-            return res.status(404).json({
-                message: "Book not found"
-            });
-
         }
+
+        return res.status(404).json({
+            message: "Book not found"
+        });
 
     } catch (error) {
 
         return res.status(500).json({
-            message: "Error retrieving book"
+            message: "Error retrieving book by ISBN"
         });
 
     }
@@ -55,20 +48,11 @@ public_users.get('/author/:author', async function (req, res) {
     try {
 
         const response = await axios.get('http://localhost:5000/');
-
         const allBooks = response.data;
 
-        const filteredBooks = Object.keys(allBooks)
-
-            .filter(key => allBooks[key].author === author)
-
-            .reduce((result, key) => {
-
-                result[key] = allBooks[key];
-
-                return result;
-
-            }, {});
+        const filteredBooks = Object.values(allBooks).filter(
+            (book) => book.author === author
+        );
 
         return res.status(200).json(filteredBooks);
 
@@ -91,20 +75,11 @@ public_users.get('/title/:title', async function (req, res) {
     try {
 
         const response = await axios.get('http://localhost:5000/');
-
         const allBooks = response.data;
 
-        const filteredBooks = Object.keys(allBooks)
-
-            .filter(key => allBooks[key].title === title)
-
-            .reduce((result, key) => {
-
-                result[key] = allBooks[key];
-
-                return result;
-
-            }, {});
+        const filteredBooks = Object.values(allBooks).filter(
+            (book) => book.title === title
+        );
 
         return res.status(200).json(filteredBooks);
 
@@ -124,7 +99,13 @@ public_users.get('/review/:isbn', function (req, res) {
 
     const isbn = req.params.isbn;
 
-    return res.status(200).json(books[isbn].reviews);
+    if (books[isbn]) {
+        return res.status(200).json(books[isbn].reviews);
+    }
+
+    return res.status(404).json({
+        message: "Book not found"
+    });
 
 });
 
